@@ -1,0 +1,115 @@
+ANTLR -> Analizador Léxico y Sintáctico
+
+yacc --> Yet Another Compiler of Compilers
+lex -->  LEXical analyzer
+
+GNU --> GCC
+   bison
+   flex -> fast lex
+
+===========
+
+DIGITO : 0 | 1 | 2 | 3 | ... | 9
+       : [0-9]
+
+LETRA  : [a-z]
+       : [A-Za-z]
+
+ESPACIOS : [ \t\n\r]
+
+SIGNOS : [-+*/]
+
+pares : [02468]
+
+vocales : [aeiou]
+
+FOR : 'for'
+---------
+
+12:00 - 17:59  --->  '1'[2-7]':'[0-5][0-9]  xxx [0-59]
+
+12:30 - 19:45  --->  ('12:'[345][0-9]) | ('1'[3-8]':'[0-5][0-9]) |
+                           ( '19:'([0-3][0-9] | '4'[0-5]) )
+
+---------
+
+Hacer las expresiones regulares para capturar:
+ - Palabras que comienzan con mayusculas
+ - Numeros pares
+ - Fechas de meses pares (mes 30 dias y año 4 digitos)
+ - Horas entre las 11:45 y las 14:15
+ - Numeros hexadecimales (C)
+
+
+---------
+
+Tabla de Símbolos
+
+Recolectar información de identificadores:
+  + Se los incorpora cuando se los declara
+  + Se indica tipo de dato
+  + Se detecta inicialización
+  + Se detecta acceso (uso)
+  + Se indica el contexto al que pertenece. Se tiene una tabla de simbolos por cada contexto.
+  + Si es función, se indica cantidad y tipo de argumentos. Lo importante es el orden (a menos que sea funcion, que se declaran en el momento)
+
+La tabla es una colección que permite:
+  + Buscar si existe un indentificador (local o globalmente, en todos los contextos)
+  + Agregar un indentificador (Antes de agregar se busca en un contexto. Si no existe se agrega, si existe se reporta).
+  + Agregar un contexto (Cada vez que se abren llaves)
+  + Borrar un contexto
+
+1. Agregar contexto
+- Se empieza con un contexto o tabla de simbolos vacia. Lista con un solo nodo vacio (singleton, diccionario vacio). Si hasta el main no hay nada, se habre en ese contexto.
+
+Orden:
+
+- 1. Prototipos de funciones / 2. Variables globales / 3. Funcion main o cualquier otra funcion con o sin prototipo
+(En C solo se puede usar lo que esta declarado y en el mismo archivo)
+(No hace falta los prototipos. Si se llama del main tienen que estar arriba. Si estan abajo tienen que tener prototipos)
+(C tira de una pasada, lo que no sabe da error)
+(Al comprobar las funciones, se debe validar con el prototipo presente en la tabla de simbolos)
+(El prototipo permite validar que algo existe antes de que se use)
+
+La llave es el inicializador de contexto. cada vez que se abren las llaves se abre un contexto.
+
+Trabajar con la regla bloque para controlar los contextos.
+
+(Se puede llevar un historial de contextos mediante otra estructura o un archivo. Es como un arbol que sigue un solo camino)
+
+Reglas que disparan el acceso a la tabla de simbolos
+
+1. bloque (el señor de los contextos)
+2. Declaracion al definir un ID (Se agrega una variable cuando no exista, se busca primero local en el contexto)
+3. Lista var (se necesita saber el tipo de dato, y si tiene una definicion se pone el flag inicializar, sino es falso)(se pueden usar booleanos)
+4. Asignacion (buscar que exista local o global, luego se verifica que lo que se quiere asignar coincida con el tipo de datos (semantica))
+5. factor (buscar que exista, y ver si es un tipo de dato correcto)(De entero a float es directo, al reves se trunca)(Ver si es una funcion y si devuelve un tipo de dato especifico)
+       (las promociones entre versiones es distinta, guarda)
+       (hacer la conversion) (me cacho)
+6. Menos ID
+7. funcion
+
+-- LISTENERS -- 
+Genera eventos cuando entro y salgo de un nodo.
+Por cada regla tenemos un enter y un exit.
+
+Cuando entro a un bloque se puede crear o acceder a la tabla de simbolos.
+
+Se pueden sobreescribir los metodos del listener y poner lo que hay que hacer. 
+
+ctx devuelve un nodo de un arbol
+
+Cuando entro no se lo que hay, pero cuando salgo tengo todo lo de los contextos
+
+visitTerminal accede a un nodo hoja. Devuelve un nodo no un contexto
+
+A getChild se le puede mandar el indice de hijo, devuelve un token
+
+un nodo tiene un diccionario. Se manejan los nodos como si fuera una pila. Se buscan los contextos en la pila, y se van sacando.
+
+-- VISITORS -- 
+Trabajan cuando el arbol ya esta hecho.
+
+Para codigo intermedio. 
+
+(para la proxima)
